@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Yamaji Pizzaria</title>
+
+    <!-- React + Babel -->
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+
+    <!-- Tailwind e fontes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+
+    <style>
+      :root {
+        --brand: #dc2626;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Poppins", sans-serif;
+        background: #fff;
+        color: #111827;
+      }
+
+      .hero {
+        /* use sua imagem local (coloque pizzariabg.jpg na mesma pasta do index) */
+        background-image: url("./pizzariabg.jpg");
+        /* fallback online (opcional) */
+        /* background-image:url('https://picsum.photos/seed/pizzeria-interior/1600/420.jpg'); */
+        background-size: cover;
+        background-position: center;
+      }
+      .chip {
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        border-radius: 9999px;
+        padding: 0.25rem 0.6rem;
+        font-size: 0.85rem;
+      }
+      .price-tag {
+        background: var(--brand);
+        color: #fff;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+      .cta {
+        background: var(--brand);
+        color: #fff;
+        padding: 0.6rem 1rem;
+        border-radius: 0.6rem;
+        font-weight: 600;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.8rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s;
+      }
+      .card:hover {
+        transform: translateY(-3px);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useState, useEffect } = React;
+
+      // ====== Config ======
+      const WHATS_NUMBER = "5511999999999"; // 55 + DDD + número (troque aqui)
+      const BORDA_PRECO = 5;
+      const STORAGE_KEY = "yamaji_pizza_cart_v1";
+
+      // ====== Cardápio (mock) ======
+      const menuData = {
+        promocoes: [
+          {
+            id: "promo1",
+            nome: "Calabreso — Antártica",
+            desc: "Pizza + Guaraná 2L",
+            preco: 68.9,
+          },
+          {
+            id: "promo2",
+            nome: "Calabreso — Pepsi",
+            desc: "Pizza + Pepsi 2L",
+            preco: 68.9,
+          },
+          {
+            id: "promo3",
+            nome: "Marguerita — Guaraná",
+            desc: "Pizza Marguerita + Guaraná 2L",
+            preco: 59.9,
+          },
+          {
+            id: "promo4",
+            nome: "Portuguesa — Coca-Cola",
+            desc: "Pizza Portuguesa + Coca-Cola 2L",
+            preco: 69.9,
+          },
+          {
+            id: "promo5",
+            nome: "Frango com Catupiry — Pepsi",
+            desc: "Pizza Frango com Catupiry + Pepsi 2L",
+            preco: 72.9,
+          },
+          {
+            id: "promo6",
+            nome: "Dois Sabores — Antártica Zero",
+            desc: "Duas pizzas + Antártica Zero 2L",
+            preco: 89.9,
+          },
+        ],
+        pizzas: [
+          {
+            id: "pz1",
+            nome: "3 Queijos",
+            desc: "Mussarela + Parmesão + Catupiry",
+            precos: { P: 39.9, M: 42.9, G: 47.9 },
+          },
+          {
+            id: "pz2",
+            nome: "Alho Crocante",
+            desc: "Mussarela + Alho crocante",
+            precos: { P: 39.9, M: 42.9, G: 47.9 },
+          },
+          {
+            id: "pz3",
+            nome: "Calabresa",
+            desc: "Mussarela + Calabresa + Cebola",
+            precos: { P: 39.9, M: 42.9, G: 47.9 },
+          },
+          {
+            id: "pz4",
+            nome: "Portuguesa",
+            desc: "Mussarela + Presunto + Ovo + Cebola",
+            precos: { P: 41.9, M: 44.9, G: 49.9 },
+          },
+          {
+            id: "pz5",
+            nome: "Frango com Catupiry",
+            desc: "Mussarela + Frango + Catupiry",
+            precos: { P: 42.9, M: 45.9, G: 50.9 },
+          },
+          {
+            id: "pz6",
+            nome: "Marguerita",
+            desc: "Mussarela + Tomate + Manjericão",
+            precos: { P: 38.9, M: 41.9, G: 46.9 },
+          },
+          {
+            id: "pz7",
+            nome: "Baiana",
+            desc: "Mussarela + Calabresa + Ovo + Pimentão",
+            precos: { P: 40.9, M: 43.9, G: 48.9 },
+          },
+          {
+            id: "pz8",
+            nome: "Brigadeiro",
+            desc: "Mussarela + Chocolate em calda + Granulado",
+            precos: { P: 42.9, M: 45.9, G: 50.9 },
+          },
+          {
+            id: "pz9",
+            nome: "Napolitana",
+            desc: "Mussarela + Tomate + Azeitona",
+            precos: { P: 39.9, M: 42.9, G: 47.9 },
+          },
+          {
+            id: "pz10",
+            nome: "Pepperoni",
+            desc: "Mussarela + Pepperoni",
+            precos: { P: 41.9, M: 44.9, G: 49.9 },
+          },
+          {
+            id: "pz11",
+            nome: "Vegetariana",
+            desc: "Mussarela + Palmito + Milho + Ervilha",
+            precos: { P: 40.9, M: 43.9, G: 48.9 },
+          },
+          {
+            id: "pz12",
+            nome: "Romana",
+            desc: "Mussarela + Tomate + Azeite + Orégano",
+            precos: { P: 38.9, M: 41.9, G: 46.9 },
+          },
+          {
+            id: "pz13",
+            nome: "Carne Seca",
+            desc: "Mussarela + Carne Seca + Cebola",
+            precos: { P: 43.9, M: 46.9, G: 51.9 },
+          },
+          {
+            id: "pz14",
+            nome: "Atum",
+            desc: "Mussarela + Atum + Cebola",
+            precos: { P: 41.9, M: 44.9, G: 49.9 },
+          },
+          {
+            id: "pz15",
+            nome: "Banana com Canela",
+            desc: "Mussarela + Banana + Canela",
+            precos: { P: 42.9, M: 45.9, G: 50.9 },
+          },
+          {
+            id: "pz16",
+            nome: "Japonesa",
+            desc: "Mussarela + Frango + Cebola + Shoyu",
+            precos: { P: 43.9, M: 46.9, G: 51.9 },
+          },
+          {
+            id: "pz17",
+            nome: "Dois Sabores",
+            desc: "Meia pizza de dois sabores diferentes",
+            precos: { P: 45.9, M: 48.9, G: 53.9 },
+          },
+          {
+            id: "pz18",
+            nome: "Quatro Queijos",
+            desc: "Mussarela + Provolone + Gorgonzola + Catupiry",
+            precos: { P: 44.9, M: 47.9, G: 52.9 },
+          },
+        ],
+        extras: {
+          borda: ["Catupiry", "Cheddar", "Chocolate (doce)", "Sem borda"],
+          adicionais: [
+            { nome: "Bacon", preco: 4.0 },
+            { nome: "Queijo extra", preco: 4.0 },
+            { nome: "Cebola", preco: 2.0 },
+            { nome: "Ovo", preco: 2.0 },
+            { nome: "Palmito", preco: 3.0 },
+            { nome: "Milho", preco: 2.0 },
+          ],
+        },
+        bebidas: {
+          pet: [
+            { id: "r1", nome: "Coca-Cola 1L", preco: 10.0 },
+            { id: "r2", nome: "Guaraná Antarctica 1L", preco: 9.0 },
+            { id: "r3", nome: "Pepsi 1L", preco: 9.0 },
+            { id: "r4", nome: "Antártica Zero 1L", preco: 9.0 },
+            { id: "r5", nome: "Fanta Laranja 1L", preco: 9.0 },
+            { id: "r6", nome: "Sprite 1L", preco: 9.0 },
+          ],
+          latas: [
+            { id: "rl1", nome: "Coca-Cola 350ml", preco: 7.0 },
+            { id: "rl2", nome: "Guaraná Antarctica 350ml", preco: 7.0 },
+            { id: "rl3", nome: "Pepsi 350ml", preco: 7.0 },
+            { id: "rl4", nome: "Antártica Zero 350ml", preco: 7.0 },
+            { id: "rl5", nome: "Fanta Laranja 350ml", preco: 7.0 },
+            { id: "rl6", nome: "Sprite 350ml", preco: 7.0 },
+          ],
+        },
+        sucos: [
+          { id: "s1", nome: "Suco Laranja Integral 500ml", preco: 15.0 },
+          { id: "s2", nome: "Suco Limão Integral 500ml", preco: 15.0 },
+          { id: "s3", nome: "Suco Maracujá Integral 500ml", preco: 15.0 },
+          { id: "s4", nome: "Suco Uva Integral 500ml", preco: 15.0 },
+        ],
+        aguas: [
+          { id: "a1", nome: "Água Mineral 500ml", preco: 4.0 },
+          { id: "a2", nome: "Água Mineral 1,5L", preco: 6.0 },
+          { id: "a3", nome: "Água Mineral com Gás 500ml", preco: 5.0 },
+        ],
+      };
+
+      // ====== Helpers ======
+      const money = (v) =>
+        new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }).format(+v || 0);
+      const priceOf = (product, size, options = {}) => {
+        const base = product.preco ?? product.precos?.[size] ?? 0;
+        const addOns = (options.adicionais || []).reduce(
+          (s, a) => s + (a.preco || 0),
+          0
+        );
+        const borda =
+          options.borda && options.borda !== "Sem borda" ? BORDA_PRECO : 0;
+        return base + addOns + borda;
+      };
+
+      const addMinutesISO = (m) => {
+        const d = new Date();
+        d.setMinutes(d.getMinutes() + m);
+        return d.toISOString().slice(0, 16);
+      };
+      const formatPt = (iso) => {
+        if (!iso) return "";
+        const d = new Date(iso);
+        const p = (n) => String(n).padStart(2, "0");
+        return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} ${p(
+          d.getHours()
+        )}:${p(d.getMinutes())}`;
+      };
+
+      function App() {
+        const [active, setActive] = useState("promocoes");
+        const [cart, setCart] = useState([]);
+        const [showCart, setShowCart] = useState(false);
+        const [product, setProduct] = useState(null);
+        const [mobileMenu, setMobileMenu] = useState(false);
+
+        // modal estados
+        const [selSize, setSelSize] = useState("M");
+        const [selBorda, setSelBorda] = useState("Sem borda");
+        const [selAdc, setSelAdc] = useState([]);
+
+        // carrinho obs + agendamento
+        const [notes, setNotes] = useState("");
+        const [schedType, setSchedType] = useState("agora"); // agora | agendar
+        const [schedWhen, setSchedWhen] = useState(addMinutesISO(45));
+
+        useEffect(() => {
+          const s = localStorage.getItem(STORAGE_KEY);
+          if (s) setCart(JSON.parse(s));
+        }, []);
+        useEffect(() => {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+        }, [cart]);
+
+        const openP = (p) => {
+          setProduct(p);
+          setSelSize(
+            p.isPromotion ? "M" : Object.keys(p.precos || { M: 0 })[0] || "M"
+          );
+          setSelBorda("Sem borda");
+          setSelAdc([]);
+        };
+
+        const addToCart = (p, size, options) => {
+          const unit = priceOf(p, size, options);
+          const sig = JSON.stringify({
+            id: p.id,
+            size,
+            borda: options.borda || "",
+            adcs: (options.adicionais || []).map((a) => a.nome).sort(),
+          });
+          const i = cart.findIndex((it) => it.signature === sig);
+          if (i >= 0) {
+            const c = [...cart];
+            c[i].quantity += 1;
+            setCart(c);
+          } else
+            setCart([
+              ...cart,
+              {
+                id: p.id,
+                nome: p.nome,
+                size,
+                options,
+                preco: unit,
+                quantity: 1,
+                signature: sig,
+              },
+            ]);
+        };
+
+        const updQty = (i, d) => {
+          const c = [...cart];
+          c[i].quantity += d;
+          if (c[i].quantity <= 0) c.splice(i, 1);
+          setCart(c);
+        };
+        const delItem = (i) => {
+          const c = [...cart];
+          c.splice(i, 1);
+          setCart(c);
+        };
+        const total = cart.reduce((t, i) => t + i.preco * i.quantity, 0);
+        const count = cart.reduce((t, i) => t + i.quantity, 0);
+
+        const waMsg = () => {
+          let m = "Olá! Quero este pedido:%0A%0A";
+          cart.forEach((i) => {
+            m += `• ${i.nome} — Tam. ${i.size} — ${i.quantity}x — ${money(
+              i.preco
+            )} cada%0A`;
+            if (i.options?.borda && i.options.borda !== "Sem borda")
+              m += `   Borda: ${i.options.borda}%0A`;
+            if (i.options?.adicionais?.length)
+              m += `   Adicionais: ${i.options.adicionais
+                .map((a) => a.nome)
+                .join(", ")}%0A`;
+          });
+          m += `%0ATotal: ${money(total)}%0A`;
+          if (schedType === "agendar" && schedWhen)
+            m += `Agendar para: ${formatPt(schedWhen)}%0A`;
+          m += `%0AObservações: ${notes || "Nenhuma"}`;
+          return m;
+        };
+
+        const checkout = () => {
+          if (!cart.length) {
+            alert("Seu carrinho está vazio.");
+            return;
+          }
+          if (schedType === "agendar") {
+            const now = new Date(),
+              when = new Date(schedWhen);
+            if (when - now < 30 * 60000) {
+              alert("Agende com pelo menos 30 minutos de antecedência.");
+              return;
+            }
+          }
+          window.open(`https://wa.me/${WHATS_NUMBER}?text=${waMsg()}`);
+        };
+
+        const navItems = [
+          { key: "promocoes", label: "Promoções Especiais" },
+          { key: "pizzas", label: "Pizzas" },
+          { key: "pet", label: "Refri PET" },
+          { key: "latas", label: "Refri Latas" },
+          { key: "sucos", label: "Sucos da Fruta" },
+          { key: "aguas", label: "Águas" },
+        ];
+
+        return (
+          <div className="bg-white text-slate-900">
+            {/* HEADER fixo com hambúrguer (mobile) */}
+            <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
+              <div className="max-w-screen-xl mx-auto px-4 h-14 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <button
+                    className="md:hidden p-2 -ml-2"
+                    aria-label="Abrir menu"
+                    onClick={() => setMobileMenu(true)}
+                  >
+                    <i className="fas fa-bars text-xl"></i>
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <img
+                      src="https://picsum.photos/seed/yamaji-logo/56/56.jpg"
+                      alt="Logo"
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                    <span className="font-semibold">Yamaji Pizzaria</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowCart(true)}
+                  className="relative p-2"
+                  aria-label="Abrir carrinho"
+                >
+                  <i className="fas fa-shopping-cart text-xl"></i>
+                  {count > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
+                      {count}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </header>
+
+            {/* MENU MOBILE (off-canvas) */}
+            {mobileMenu && (
+              <div className="fixed inset-0 z-50">
+                <div
+                  className="absolute inset-0 bg-black/50"
+                  onClick={() => setMobileMenu(false)}
+                ></div>
+                <div className="absolute left-0 top-0 h-full w-72 bg-white shadow-xl p-4 flex flex-col">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="font-semibold">Menu</div>
+                    <button
+                      onClick={() => setMobileMenu(false)}
+                      aria-label="Fechar menu"
+                    >
+                      <i className="fas fa-times text-lg"></i>
+                    </button>
+                  </div>
+                  <nav className="flex-1">
+                    <ul className="space-y-2">
+                      {navItems.map((it) => (
+                        <li key={it.key}>
+                          <button
+                            onClick={() => {
+                              setActive(it.key);
+                              setMobileMenu(false);
+                              document
+                                .querySelector("#tabs")
+                                ?.scrollIntoView({ behavior: "smooth" });
+                            }}
+                            className={`w-full text-left px-3 py-2 rounded ${
+                              active === it.key
+                                ? "bg-red-600 text-white"
+                                : "hover:bg-gray-100"
+                            }`}
+                          >
+                            {it.label}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                  <div className="pt-4 border-t">
+                    <button
+                      className="w-full cta"
+                      onClick={() => {
+                        setMobileMenu(false);
+                        setShowCart(true);
+                      }}
+                    >
+                      Finalizar pedido
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* BANNER */}
+            <div className="hero h-52 sm:h-72 lg:h-[360px] w-full"></div>
+
+            {/* TÍTULO/INFOS */}
+            <div className="max-w-screen-xl mx-auto px-4 -mt-10">
+              <div className="w-24 h-24 rounded-full border-4 border-white bg-white shadow-md mx-auto overflow-hidden">
+                <img
+                  src="https://picsum.photos/seed/yamaji-logo/200/200.jpg"
+                  alt="Logo"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              <div className="text-center mt-3">
+                <h1 className="text-2xl md:text-3xl font-extrabold">
+                  Yamaji Pizzaria
+                </h1>
+                <div className="flex flex-wrap gap-2 justify-center items-center mt-3">
+                  <span className="chip bg-emerald-50 border-emerald-200 text-emerald-700 font-semibold">
+                    Aberto
+                  </span>
+                  <span className="chip text-slate-700">
+                    <i className="far fa-clock mr-1"></i>30–45 min
+                  </span>
+                  <span className="chip text-slate-700">
+                    <i className="fas fa-dollar-sign mr-1"></i>Mínimo R$ 25,00
+                  </span>
+                  <button
+                    className="cta"
+                    onClick={() =>
+                      document
+                        .querySelector("#tabs")
+                        .scrollIntoView({ behavior: "smooth" })
+                    }
+                  >
+                    Ver cardápio
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* TABS (desktop/tablet). No mobile usamos o menu hambúrguer */}
+            <div
+              id="tabs"
+              className="hidden md:block sticky top-14 z-40 bg-white border-y border-gray-200 mt-6"
+            >
+              <div className="max-w-screen-xl mx-auto px-4">
+                <ul className="flex overflow-x-auto whitespace-nowrap py-3 gap-2">
+                  {[
+                    { key: "promocoes", label: "Promoções Especiais" },
+                    { key: "pizzas", label: "Pizzas" },
+                    { key: "pet", label: "Refri PET" },
+                    { key: "latas", label: "Refri Latas" },
+                    { key: "sucos", label: "Sucos da Fruta" },
+                    { key: "aguas", label: "Águas" },
+                  ].map(({ key, label }) => (
+                    <li key={key}>
+                      <button
+                        onClick={() => setActive(key)}
+                        className={`px-4 py-2 rounded-lg ${
+                          active === key
+                            ? "bg-red-600 text-white"
+                            : "hover:bg-slate-100 text-slate-700"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* CONTEÚDO */}
+            <main className="max-w-screen-xl mx-auto px-4 py-8">
+              {active === "promocoes" && (
+                <section>
+                  <h2 className="text-2xl font-bold mb-6">
+                    Promoções Especiais
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    {menuData.promocoes.map((p) => (
+                      <div key={p.id} className="card">
+                        <div className="p-4">
+                          <h3 className="font-semibold text-lg">{p.nome}</h3>
+                          <p className="text-slate-600 text-sm mt-1">
+                            {p.desc}
+                          </p>
+                          <div className="mt-4 flex justify-between items-center">
+                            <span className="price-tag">{money(p.preco)}</span>
+                            <button
+                              className="cta"
+                              onClick={() => openP({ ...p, isPromotion: true })}
+                            >
+                              Escolher
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {active === "pizzas" && (
+                <section>
+                  <h2 className="text-2xl font-bold mb-6">Pizzas</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    {menuData.pizzas.map((p) => (
+                      <div key={p.id} className="card">
+                        <div className="p-4">
+                          <h3 className="font-semibold text-lg">{p.nome}</h3>
+                          <p className="text-slate-600 text-sm mt-1">
+                            {p.desc}
+                          </p>
+                          <div className="mt-4 flex justify-between items-center">
+                            <span className="price-tag">
+                              a partir de{" "}
+                              {money(p.precos.P || Object.values(p.precos)[0])}
+                            </span>
+                            <button className="cta" onClick={() => openP(p)}>
+                              Escolher
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {(active === "pet" || active === "latas") && (
+                <section>
+                  <h2 className="text-2xl font-bold mb-6">
+                    {active === "pet"
+                      ? "Refrigerantes PET"
+                      : "Refrigerantes Latas"}
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    {menuData.bebidas[active].map((d) => (
+                      <div key={d.id} className="card">
+                        <div className="p-4">
+                          <h3 className="font-semibold text-lg">{d.nome}</h3>
+                          <div className="mt-4 flex justify-between items-center">
+                            <span className="price-tag">{money(d.preco)}</span>
+                            <button
+                              className="cta"
+                              onClick={() => addToCart(d, "", {})}
+                            >
+                              Adicionar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {active === "sucos" && (
+                <section>
+                  <h2 className="text-2xl font-bold mb-6">Sucos da Fruta</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    {menuData.sucos.map((s) => (
+                      <div key={s.id} className="card">
+                        <div className="p-4">
+                          <h3 className="font-semibold text-lg">{s.nome}</h3>
+                          <div className="mt-4 flex justify-between items-center">
+                            <span className="price-tag">{money(s.preco)}</span>
+                            <button
+                              className="cta"
+                              onClick={() => addToCart(s, "", {})}
+                            >
+                              Adicionar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {active === "aguas" && (
+                <section>
+                  <h2 className="text-2xl font-bold mb-6">Águas</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    {menuData.aguas.map((a) => (
+                      <div key={a.id} className="card">
+                        <div className="p-4">
+                          <h3 className="font-semibold text-lg">{a.nome}</h3>
+                          <div className="mt-4 flex justify-between items-center">
+                            <span className="price-tag">{money(a.preco)}</span>
+                            <button
+                              className="cta"
+                              onClick={() => addToCart(a, "", {})}
+                            >
+                              Adicionar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </main>
+
+            {/* FOOTER */}
+            <footer className="bg-gray-50 py-8 mt-12 border-t border-gray-200">
+              <div className="max-w-screen-xl mx-auto px-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div>
+                    <h3 className="text-xl font-bold mb-4">Yamaji Pizzaria</h3>
+                    <p className="text-slate-600">
+                      Ingredientes frescos e muito sabor.
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-4">Contato</h3>
+                    <p className="text-slate-600">Telefone: (11) 1234-5678</p>
+                    <p className="text-slate-600">
+                      Endereço: Rua da Pizza, 123 - São Paulo, SP
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-4">Horário</h3>
+                    <p className="text-slate-600">Seg-Sex: 11:00 - 23:00</p>
+                    <p className="text-slate-600">Sáb-Dom: 12:00 - 22:00</p>
+                  </div>
+                </div>
+                <div className="border-t border-gray-200 mt-8 pt-4 text-center text-slate-500">
+                  <p>
+                    &copy; 2025 Yamaji Pizzaria. Todos os direitos reservados.
+                  </p>
+                </div>
+              </div>
+            </footer>
+
+            {/* MODAL PRODUTO */}
+            {product && (
+              <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-lg">
+                  <h3 className="text-xl font-bold mb-2">{product.nome}</h3>
+                  <p className="text-slate-600 mb-4">{product.desc}</p>
+
+                  {/* Tamanho */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2">
+                      Tamanho
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {product.isPromotion
+                        ? ["M"].map((s) => (
+                            <button
+                              key={s}
+                              className="bg-red-600 text-white px-4 py-2 rounded"
+                            >
+                              {s}
+                            </button>
+                          ))
+                        : Object.keys(product.precos || {}).map((s) => (
+                            <button
+                              key={s}
+                              onClick={() => setSelSize(s)}
+                              className={`px-4 py-2 rounded border ${
+                                selSize === s
+                                  ? "bg-red-600 text-white border-red-600"
+                                  : "bg-gray-100 hover:bg-gray-200 border-gray-200"
+                              }`}
+                            >
+                              {s} — {money(product.precos[s])}
+                            </button>
+                          ))}
+                    </div>
+                  </div>
+
+                  {/* Borda */}
+                  {!product.isPromotion && (
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium mb-2">
+                        Borda
+                      </label>
+                      <select
+                        className="w-full bg-gray-100 text-slate-900 p-2 rounded border border-gray-200"
+                        value={selBorda}
+                        onChange={(e) => setSelBorda(e.target.value)}
+                      >
+                        {menuData.extras.borda.map((b) => (
+                          <option value={b} key={b}>
+                            {b}
+                          </option>
+                        ))}
+                      </select>
+                      {selBorda !== "Sem borda" && (
+                        <p className="text-xs text-slate-500 mt-1">
+                          + {money(BORDA_PRECO)}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Adicionais */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2">
+                      Adicionais
+                    </label>
+                    <div className="space-y-2">
+                      {menuData.extras.adicionais.map((adc) => {
+                        const checked = !!selAdc.find(
+                          (a) => a.nome === adc.nome
+                        );
+                        return (
+                          <label key={adc.nome} className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="mr-2"
+                              checked={checked}
+                              onChange={() =>
+                                setSelAdc(
+                                  checked
+                                    ? selAdc.filter((a) => a.nome !== adc.nome)
+                                    : [...selAdc, adc]
+                                )
+                              }
+                            />
+                            <span>
+                              {adc.nome} (+{money(adc.preco)})
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm text-slate-600">Subtotal</span>
+                    <strong>
+                      {money(
+                        priceOf(
+                          product,
+                          product.isPromotion ? "M" : selSize,
+                          product.isPromotion
+                            ? {}
+                            : { borda: selBorda, adicionais: selAdc }
+                        )
+                      )}
+                    </strong>
+                  </div>
+
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => setProduct(null)}
+                      className="bg-gray-100 hover:bg-gray-200 text-slate-900 px-4 py-2 rounded border border-gray-200"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={() => {
+                        const opts = product.isPromotion
+                          ? {}
+                          : { borda: selBorda, adicionais: selAdc };
+                        const size = product.isPromotion ? "M" : selSize;
+                        addToCart(product, size, opts);
+                        setProduct(null);
+                      }}
+                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+                    >
+                      Adicionar ao Carrinho
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* DRAWER CARRINHO */}
+            <div
+              className={`${
+                showCart ? "translate-x-0" : "translate-x-full"
+              } fixed right-0 top-0 h-full w-[92vw] sm:w-80 bg-white border-l border-gray-200 shadow-xl transition-transform duration-300 z-40`}
+            >
+              <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 className="text-xl font-bold">Carrinho</h3>
+                <button
+                  onClick={() => setShowCart(false)}
+                  className="text-slate-500 hover:text-slate-700"
+                >
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+
+              <div className="p-4 overflow-y-auto h-[calc(100%-220px)]">
+                {cart.length === 0 ? (
+                  <p className="text-slate-500 text-center py-8">
+                    Seu pedido começa aqui 🍕
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {cart.map((it, i) => (
+                      <div
+                        key={i}
+                        className="flex justify-between items-start gap-2"
+                      >
+                        <div>
+                          <h4 className="font-medium">{it.nome}</h4>
+                          <p className="text-sm text-slate-600">
+                            Tamanho: {it.size}
+                          </p>
+                          {it.options?.borda &&
+                            it.options.borda !== "Sem borda" && (
+                              <p className="text-sm text-slate-600">
+                                Borda: {it.options.borda}
+                              </p>
+                            )}
+                          {it.options?.adicionais?.length > 0 && (
+                            <p className="text-sm text-slate-600">
+                              Adicionais:{" "}
+                              {it.options.adicionais
+                                .map((a) => a.nome)
+                                .join(", ")}
+                            </p>
+                          )}
+                          <p className="text-sm mt-1">
+                            {money(it.preco)}{" "}
+                            <span className="text-slate-500">cada</span>
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => updQty(i, -1)}
+                            className="bg-gray-100 hover:bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center border border-gray-200"
+                          >
+                            -
+                          </button>
+                          <span>{it.quantity}</span>
+                          <button
+                            onClick={() => updQty(i, 1)}
+                            className="bg-gray-100 hover:bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center border border-gray-200"
+                          >
+                            +
+                          </button>
+                          <button
+                            onClick={() => delItem(i)}
+                            className="text-red-600 ml-2"
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Agendamento */}
+              <div className="px-4 pb-2">
+                <label className="block text-sm font-medium mb-2">
+                  Quando deseja receber?
+                </label>
+                <div className="flex items-center gap-3 mb-2">
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="radio"
+                      name="ag"
+                      checked={schedType === "agora"}
+                      onChange={() => setSchedType("agora")}
+                    />{" "}
+                    Agora
+                  </label>
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="radio"
+                      name="ag"
+                      checked={schedType === "agendar"}
+                      onChange={() => setSchedType("agendar")}
+                    />{" "}
+                    Agendar
+                  </label>
+                </div>
+                {schedType === "agendar" && (
+                  <input
+                    type="datetime-local"
+                    className="w-full bg-gray-100 text-slate-900 p-2 rounded border border-gray-200 mb-2"
+                    value={schedWhen}
+                    min={addMinutesISO(30)}
+                    onChange={(e) => setSchedWhen(e.target.value)}
+                  />
+                )}
+              </div>
+
+              <div className="p-4 border-t border-gray-200">
+                <textarea
+                  className="w-full bg-gray-100 text-slate-900 p-2 rounded mb-4 resize-none border border-gray-200"
+                  rows="3"
+                  placeholder="Observações para o pedido..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+                <div className="flex justify-between items-center mb-4">
+                  <span className="font-bold">Total:</span>
+                  <span className="font-bold">{money(total)}</span>
+                </div>
+                <button className="w-full cta" onClick={checkout}>
+                  Finalizar pelo WhatsApp
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      ReactDOM.render(<App />, document.getElementById("root"));
+    </script>
+  </body>
+</html>
